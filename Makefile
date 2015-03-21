@@ -20,7 +20,7 @@ precommit: doc
 
 check_for_codeship:
 	@ if ! which codeship > /dev/null; then \
-		echo "error: codeship not installed" >&2; \
+			echo "error: codeship not installed" >&2; \
 	  fi
 
 deps:

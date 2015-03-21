@@ -16,3 +16,91 @@ import (
 ```
 
 ## Usage
+
+```go
+var (
+	ErrAlreadyDestroyed = errors.New("concurrent: already destroyed")
+)
+```
+
+#### type BackgroundWorker
+
+```go
+type BackgroundWorker interface {
+	Do(f func() (interface{}, error))
+	WaitToFinish() ([]interface{}, error)
+}
+```
+
+
+#### func  NewBackgroundWorker
+
+```go
+func NewBackgroundWorker() BackgroundWorker
+```
+
+#### type CombinedError
+
+```go
+type CombinedError interface {
+	error
+	Errors() []error
+}
+```
+
+
+#### func  NewCombinedError
+
+```go
+func NewCombinedError(errs []error) CombinedError
+```
+
+#### type Destroyable
+
+```go
+type Destroyable interface {
+	Destroy() error
+	Do(func() (interface{}, error)) (interface{}, error)
+	AddChild(Destroyable) error
+}
+```
+
+
+#### func  NewDestroyable
+
+```go
+func NewDestroyable(destroyCallback func() error) Destroyable
+```
+
+#### type LazyLoader
+
+```go
+type LazyLoader interface {
+	Load() (interface{}, error)
+}
+```
+
+
+#### func  NewLazyLoader
+
+```go
+func NewLazyLoader(f func() (interface{}, error)) LazyLoader
+```
+
+#### type VolatileBool
+
+```go
+type VolatileBool interface {
+	Value() bool
+	// return old value == new value
+	CompareAndSwap(oldBool bool, newBool bool) bool
+}
+```
+
+TODO(pedge): is this even needed? need to understand go memory model better
+
+#### func  NewVolatileBool
+
+```go
+func NewVolatileBool(initialBool bool) VolatileBool
+```

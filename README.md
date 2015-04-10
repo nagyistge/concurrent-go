@@ -23,6 +23,12 @@ var (
 )
 ```
 
+#### func  NewBlockingReadWriteCloser
+
+```go
+func NewBlockingReadWriteCloser() io.ReadWriteCloser
+```
+
 #### type BackgroundWorker
 
 ```go

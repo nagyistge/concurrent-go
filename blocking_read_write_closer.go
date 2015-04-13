@@ -60,6 +60,6 @@ func (this *blockingReadWriteCloser) Close() error {
 	if !this.closed.CompareAndSwap(false, true) {
 		return errors.New("concurrent: already called close")
 	}
-	this.cv.Signal()
+	this.cv.Broadcast()
 	return nil
 }

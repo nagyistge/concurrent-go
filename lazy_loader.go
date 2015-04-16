@@ -37,7 +37,7 @@ func (this *lazyLoader) Load() (interface{}, error) {
 	value := this.value.Load()
 	err := this.err.Load()
 	if err != nil {
-		return nil, err.(error)
+		return value, err.(error)
 	}
 	return value, nil
 }

@@ -35,7 +35,7 @@ func (this *blockingReadWriteCloser) Write(p []byte) (int, error) {
 	this.cv.L.Lock()
 	defer this.cv.L.Unlock()
 	n, err := this.buffer.Write(p)
-	this.cv.Signal()
+	this.cv.Broadcast()
 	return n, err
 }
 

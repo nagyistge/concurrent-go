@@ -20,11 +20,7 @@ func newCombinedError(errs []error) *combinedError {
 }
 
 func (this *combinedError) Error() string {
-	errStrings := make([]string, len(this.errs))
-	for i, err := range this.errs {
-		errStrings[i] = err.Error()
-	}
-	return fmt.Sprintf("%v", errStrings)
+	return fmt.Sprintf("%v", this.errs)
 }
 
 func (this *combinedError) Errors() []error {

@@ -5,11 +5,13 @@ import (
 	"sync"
 )
 
+// BackgroundWorker does work in the background.
 type BackgroundWorker interface {
-	Do(f func() (interface{}, error))
+	Do(f func() (interface{}, error)) error
 	Close() ([]interface{}, error)
 }
 
+// NewBackgroundWorker creates a new BackgroundWorker.
 func NewBackgroundWorker() BackgroundWorker {
 	return newBackgroundWorker()
 }
@@ -29,27 +31,28 @@ func newBackgroundWorker() *backgroundWorker {
 	return &backgroundWorker{&sync.WaitGroup{}, make(chan *valueError), NewDestroyable(nil)}
 }
 
-func (this *backgroundWorker) Do(f func() (interface{}, error)) {
-	this.destroyable.Do(func() (interface{}, error) {
-		this.wg.Add(1)
+func (b *backgroundWorker) Do(f func() (interface{}, error)) error {
+	_, err := b.destroyable.Do(func() (interface{}, error) {
+		b.wg.Add(1)
 		go func() {
 			value, err := f()
-			this.valueErrors <- &valueError{value, err}
-			this.wg.Done()
+			b.valueErrors <- &valueError{value, err}
+			b.wg.Done()
 		}()
 		return nil, nil
 	})
+	return err
 }
 
-func (this *backgroundWorker) Close() ([]interface{}, error) {
-	values := make([]interface{}, 0)
-	errs := make([]error, 0)
-	if err := this.destroyable.Destroy(); err != nil {
+func (b *backgroundWorker) Close() ([]interface{}, error) {
+	var values []interface{}
+	var errs []error
+	if err := b.destroyable.Destroy(); err != nil {
 		errs = append(errs, err)
 	}
 	go func() {
 		for {
-			valueError, ok := <-this.valueErrors
+			valueError, ok := <-b.valueErrors
 			if !ok {
 				break
 			}
@@ -59,8 +62,8 @@ func (this *backgroundWorker) Close() ([]interface{}, error) {
 			}
 		}
 	}()
-	this.wg.Wait()
-	close(this.valueErrors)
+	b.wg.Wait()
+	close(b.valueErrors)
 	if len(errs) == 0 {
 		return values, nil
 	}

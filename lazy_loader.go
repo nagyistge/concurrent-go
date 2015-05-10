@@ -5,10 +5,12 @@ import (
 	"sync/atomic"
 )
 
+// LazyLoader allows a function to be lazily atomically loaded.
 type LazyLoader interface {
 	Load() (interface{}, error)
 }
 
+// NewLazyLoader creates a new LazyLoader.
 func NewLazyLoader(f func() (interface{}, error)) LazyLoader {
 	return newLazyLoader(f)
 }
@@ -24,18 +26,18 @@ func newLazyLoader(f func() (interface{}, error)) *lazyLoader {
 	return &lazyLoader{&sync.Once{}, f, &atomic.Value{}, &atomic.Value{}}
 }
 
-func (this *lazyLoader) Load() (interface{}, error) {
-	this.once.Do(func() {
-		value, err := this.f()
+func (l *lazyLoader) Load() (interface{}, error) {
+	l.once.Do(func() {
+		value, err := l.f()
 		if value != nil {
-			this.value.Store(value)
+			l.value.Store(value)
 		}
 		if err != nil {
-			this.err.Store(err)
+			l.err.Store(err)
 		}
 	})
-	value := this.value.Load()
-	err := this.err.Load()
+	value := l.value.Load()
+	err := l.err.Load()
 	if err != nil {
 		return value, err.(error)
 	}

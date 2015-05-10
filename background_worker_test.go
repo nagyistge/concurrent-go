@@ -3,46 +3,60 @@ package concurrent
 import (
 	"errors"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestBackgroundWorkerBasic(t *testing.T) {
 	backgroundWorker := NewBackgroundWorker()
-	backgroundWorker.Do(func() (interface{}, error) {
+	if err := backgroundWorker.Do(func() (interface{}, error) {
 		return 1, nil
-	})
-	backgroundWorker.Do(func() (interface{}, error) {
+	}); err != nil {
+		t.Error(err)
+	}
+	if err := backgroundWorker.Do(func() (interface{}, error) {
 		return 2, nil
-	})
-	backgroundWorker.Do(func() (interface{}, error) {
+	}); err != nil {
+		t.Error(err)
+	}
+	if err := backgroundWorker.Do(func() (interface{}, error) {
 		return 3, nil
-	})
+	}); err != nil {
+		t.Error(err)
+	}
 	values, err := backgroundWorker.Close()
-	require.NoError(t, err)
+	if err != nil {
+		t.Error(err)
+	}
 	checkForValues(t, values, 1, 2, 3)
 }
 
 func TestBackgroundWorkerError(t *testing.T) {
 	backgroundWorker := NewBackgroundWorker()
-	backgroundWorker.Do(func() (interface{}, error) {
+	if err := backgroundWorker.Do(func() (interface{}, error) {
 		return 1, nil
-	})
-	backgroundWorker.Do(func() (interface{}, error) {
+	}); err != nil {
+		t.Error(err)
+	}
+	if err := backgroundWorker.Do(func() (interface{}, error) {
 		return 2, nil
-	})
-	backgroundWorker.Do(func() (interface{}, error) {
+	}); err != nil {
+		t.Error(err)
+	}
+	if err := backgroundWorker.Do(func() (interface{}, error) {
 		return 3, errors.New("error")
-	})
+	}); err != nil {
+		t.Error(err)
+	}
 	values, err := backgroundWorker.Close()
-	require.Error(t, err)
-	require.Equal(t, "[error]", err.Error())
+	if err == nil || err.Error() != "[error]" {
+		t.Errorf("expected [error], got %v", err)
+	}
 	checkForValues(t, values, 1, 2, 3)
-
 }
 
 func checkForValues(t *testing.T, actualValues []interface{}, expectedValues ...interface{}) {
-	require.Equal(t, len(expectedValues), len(actualValues))
+	if len(expectedValues) != len(actualValues) {
+		t.Errorf("expected set of %v, got %v", expectedValues, actualValues)
+	}
 	valuesMap := make(map[interface{}]bool)
 	for _, expectedValue := range expectedValues {
 		valuesMap[expectedValue] = false
@@ -51,6 +65,8 @@ func checkForValues(t *testing.T, actualValues []interface{}, expectedValues ...
 		valuesMap[actualValue] = true
 	}
 	for _, valuePresent := range valuesMap {
-		require.True(t, valuePresent)
+		if !valuePresent {
+			t.Fatalf("expected set of %v, got %v", expectedValues, actualValues)
+		}
 	}
 }

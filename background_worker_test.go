@@ -18,7 +18,7 @@ func TestBackgroundWorkerBasic(t *testing.T) {
 	backgroundWorker.Do(func() (interface{}, error) {
 		return 3, nil
 	})
-	values, err := backgroundWorker.WaitToFinish()
+	values, err := backgroundWorker.Close()
 	require.NoError(t, err)
 	checkForValues(t, values, 1, 2, 3)
 }
@@ -34,7 +34,7 @@ func TestBackgroundWorkerError(t *testing.T) {
 	backgroundWorker.Do(func() (interface{}, error) {
 		return 3, errors.New("error")
 	})
-	values, err := backgroundWorker.WaitToFinish()
+	values, err := backgroundWorker.Close()
 	require.Error(t, err)
 	require.Equal(t, "[error]", err.Error())
 	checkForValues(t, values, 1, 2, 3)

@@ -1,10 +1,13 @@
 package concurrent
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type BackgroundWorker interface {
 	Do(f func() (interface{}, error))
-	WaitToFinish() ([]interface{}, error)
+	Close() ([]interface{}, error)
 }
 
 func NewBackgroundWorker() BackgroundWorker {
@@ -38,7 +41,7 @@ func (this *backgroundWorker) Do(f func() (interface{}, error)) {
 	})
 }
 
-func (this *backgroundWorker) WaitToFinish() ([]interface{}, error) {
+func (this *backgroundWorker) Close() ([]interface{}, error) {
 	values := make([]interface{}, 0)
 	errs := make([]error, 0)
 	if err := this.destroyable.Destroy(); err != nil {
@@ -61,5 +64,5 @@ func (this *backgroundWorker) WaitToFinish() ([]interface{}, error) {
 	if len(errs) == 0 {
 		return values, nil
 	}
-	return values, NewCombinedError(errs)
+	return values, fmt.Errorf("%v", errs)
 }

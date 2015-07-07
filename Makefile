@@ -4,9 +4,7 @@
 	updatedeps \
 	testdeps \
 	updatetestdeps \
-	generate \
 	build \
-	install \
 	lint \
 	vet \
 	errcheck \
@@ -29,33 +27,27 @@ testdeps:
 updatetestdeps:
 	go get -d -v -t -u -f ./...
 
-generate:
-	go generate ./...
-
-build: deps generate
+build: deps
 	go build ./...
 
-install: deps generate
-	go install ./...
-
-lint: testdeps generate
+lint: testdeps
 	go get -v github.com/golang/lint/golint
-	golint ./...
+	golint ./.
 
-vet: testdeps generate
+vet: testdeps
 	go get -v golang.org/x/tools/cmd/vet
 	go vet ./...
 
-errcheck:
+errcheck: testdeps
 	go get -v github.com/kisielk/errcheck
 	errcheck ./...
 
 pretest: lint vet errcheck
 
-test: testdeps generate pretest
+test: testdeps
 	go test -test.v ./...
 
-cov: testdeps generate
+cov: testdeps
 	go get -v github.com/axw/gocov/gocov
 	go get golang.org/x/tools/cmd/cover
 	gocov test | gocov report

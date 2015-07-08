@@ -44,7 +44,7 @@ errcheck: testdeps
 
 pretest: lint vet errcheck
 
-test: testdeps
+test: testdeps pretest
 	go test -test.v ./...
 
 cov: testdeps
